@@ -3,7 +3,6 @@
 --
 -- See the kickstart.nvim README for more information
 return {
-  { 'Civitasv/cmake-tools.nvim' },
   { 'diegoulloao/neofusion.nvim', priority = 1000, config = true, opts = ... },
   {
     'stevearc/quicker.nvim',

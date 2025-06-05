@@ -107,6 +107,15 @@ vim.opt.relativenumber = true
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
+local vt_enabled = false
+
+-- Toggle virtual text diagnostics
+vim.keymap.set('n', '<leader>td', function()
+  vt_enabled = not vt_enabled
+  vim.diagnostic.config { virtual_text = vt_enabled }
+  print('Virtual Text: ' .. (vt_enabled and 'ON' or 'OFF'))
+end, { desc = 'Toggle virtual text diagnostics' })
+
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
 
@@ -413,8 +422,6 @@ require('lazy').setup({
     end,
   },
 
-  { 'mfussenegger/nvim-jdtls' },
-
   { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -555,6 +562,32 @@ require('lazy').setup({
         end,
       })
 
+      vim.diagnostic.config {
+        severity_sort = true,
+        float = { border = 'rounded', source = 'if_many' },
+        underline = { severity = vim.diagnostic.severity.ERROR },
+        signs = vim.g.have_nerd_font and {
+          text = {
+            [vim.diagnostic.severity.ERROR] = '󰅚 ',
+            [vim.diagnostic.severity.WARN] = '󰀪 ',
+            [vim.diagnostic.severity.INFO] = '󰋽 ',
+            [vim.diagnostic.severity.HINT] = '󰌶 ',
+          },
+        } or {},
+        virtual_text = {
+          source = 'if_many',
+          spacing = 2,
+          format = function(diagnostic)
+            local diagnostic_message = {
+              [vim.diagnostic.severity.ERROR] = diagnostic.message,
+              [vim.diagnostic.severity.WARN] = diagnostic.message,
+              [vim.diagnostic.severity.INFO] = diagnostic.message,
+              [vim.diagnostic.severity.HINT] = diagnostic.message,
+            }
+            return diagnostic_message[diagnostic.severity]
+          end,
+        },
+      }
       -- LSP servers and clients are able to communicate to each other what features they support.
       --  By default, Neovim doesn't support everything that is in the LSP specification.
       --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
@@ -573,10 +606,10 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         clangd = {},
-        jdtls = {},
+        -- jdtls = {},
         -- gopls = {},
         -- pyright = {},
-        -- rust_analyzer = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -626,7 +659,6 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
-        'jdtls',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -794,10 +826,12 @@ require('lazy').setup({
   },
   {
 
-    'wincent/base16-nvim',
+    --'wincent/base16-nvim',
+    'metalelf0/black-metal-theme-neovim',
     priority = 1000,
+    lazy = false,
     init = function()
-      vim.cmd.colorscheme 'base16-default-dark'
+      vim.cmd.colorscheme 'impaled-nazarene'
       vim.cmd.hi 'Comment gui=none'
     end,
   },
